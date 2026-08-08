@@ -496,7 +496,9 @@ final class DocBlockAuditor
             );
         }
 
-        preg_match_all('/@param\s+\S+\s+(?:\.\.\.)?(\$[A-Za-z_][A-Za-z0-9_]*)/', $doc, $matches);
+        // The type may itself contain spaces (`array{id: string, tags: list<string>}`), so scan the
+        // rest of the line non-greedily for the first variable token rather than assuming one word.
+        preg_match_all('/@param\s+[^\n]*?(?:\.\.\.)?(\$[A-Za-z_][A-Za-z0-9_]*)/', $doc, $matches);
         $documented = $matches[1];
 
         foreach ($signature['parameters'] as $parameter) {

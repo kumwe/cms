@@ -192,6 +192,12 @@ jobs:
       - name: Verify source policy
         run: composer architecture:policy
 
+      - name: Verify documentation blocks
+        run: |
+          php tools/format-docblocks.php src
+          git diff --exit-code -- src
+          php tools/verify-docblocks.php src
+
       - name: Generate coding-standard normalization evidence
         run: |
           composer cs:fix || true
