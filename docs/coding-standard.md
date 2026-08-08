@@ -53,8 +53,8 @@ tag-ordered block that reads the same everywhere in the tree.
  * Optional paragraph that says when to reach for it: the problem it solves, the guarantee it
  * makes, and which collaborator owns the parts it does not.
  *
- * @param   string       $reference  What the caller identifies with this value.
- * @param   list<string> $fields     Which fields the projection restricts itself to.
+ * @param   string        $reference  What the caller identifies with this value.
+ * @param   list<string>  $fields     Which fields the projection restricts itself to.
  *
  * @return  ContentRecord  The stored record with its publication window resolved.
  *
