@@ -301,7 +301,8 @@ final class DocBlockAuditor
                 continue;
             }
 
-            // Attributes and modifiers sit between the doc block and the declaration; keep the block.
+            // Attributes, modifiers and the tokens of a declared type all sit between the doc block
+            // and the name it documents, so none of them may discard the pending block.
             if (in_array($id, [
                 T_ATTRIBUTE,
                 T_FINAL,
@@ -312,6 +313,12 @@ final class DocBlockAuditor
                 T_PROTECTED,
                 T_PRIVATE,
                 T_VAR,
+                T_STRING,
+                T_ARRAY,
+                T_CALLABLE,
+                T_NAME_QUALIFIED,
+                T_NAME_FULLY_QUALIFIED,
+                T_NS_SEPARATOR,
             ], true) || (defined('T_PUBLIC_SET') && in_array($id, [T_PUBLIC_SET, T_PROTECTED_SET, T_PRIVATE_SET], true))) {
                 continue;
             }
@@ -728,7 +735,12 @@ final class DocBlockAuditor
         for ($i = $index - 1; $i >= 0; $i--) {
             $token = $tokens[$i];
 
+            // Nullable markers and union or intersection separators are part of the declared type.
             if (is_string($token)) {
+                if ($token === '?' || $token === '|' || $token === '&') {
+                    continue;
+                }
+
                 return false;
             }
 
