@@ -39,13 +39,13 @@ final class DocBlockFormatter
         'return' => 3,
         'throws' => 4,
         'var' => 5,
-        'deprecated' => 6,
-        'see' => 6,
-        'link' => 6,
-        'internal' => 6,
-        'todo' => 6,
-        'uses' => 6,
-        'since' => 7,
+        'deprecated' => 5,
+        'see' => 5,
+        'link' => 5,
+        'internal' => 5,
+        'todo' => 5,
+        'uses' => 5,
+        'since' => 5,
     ];
 
     /**
@@ -317,9 +317,11 @@ final class DocBlockFormatter
             $previousGroup = $group;
 
             $name = '@' . $entry['tag'];
-            $value = $entry['tag'] === 'param'
-                ? $this->renderParameter($entry['value'], $typeWidth, $variableWidth)
-                : $entry['value'];
+            $value = match ($entry['tag']) {
+                'param' => $this->renderParameter($entry['value'], $typeWidth, $variableWidth),
+                'return', 'throws', 'var' => $this->renderTypeAndDescription($entry['value']),
+                default => $entry['value'],
+            };
 
             $padded = strlen($name) <= self::ALIGNABLE_WIDTH
                 ? str_pad($name, $column)
@@ -453,6 +455,61 @@ final class DocBlockFormatter
             : $this->pad($parts['variable'], $variableWidth) . '  ' . $parts['description'];
 
         return rtrim($rendered);
+    }
+
+    /**
+     * Separate a type from its trailing description with the house two-space gap.
+     *
+     * The split is bracket aware, so a generic or array-shape type keeps the spaces inside its own
+     * angle, brace, bracket, and parenthesis groups. A type whose brackets never close on this line —
+     * a multi-line array shape — is returned untouched.
+     *
+     * @param  string  $value  Raw tag value.
+     *
+     * @return string The value with exactly two spaces between the type and the description.
+     *
+     * @since  2.0.1
+     */
+    private function renderTypeAndDescription(string $value): string
+    {
+        $depth = 0;
+        $length = strlen($value);
+
+        for ($i = 0; $i < $length; $i++) {
+            $character = $value[$i];
+
+            if (str_contains('<{[(', $character)) {
+                $depth++;
+
+                continue;
+            }
+
+            if (str_contains('>}])', $character)) {
+                $depth--;
+
+                continue;
+            }
+
+            if ($character !== ' ' || $depth !== 0) {
+                continue;
+            }
+
+            $before = $value[$i - 1] ?? '';
+            $after = ltrim(substr($value, $i));
+
+            // Spaces that belong to a spelled-out union or intersection are part of the type.
+            if (str_contains('|&', $before) || str_contains('|&', $after[0] ?? '')) {
+                continue;
+            }
+
+            if ($after === '') {
+                break;
+            }
+
+            return rtrim(substr($value, 0, $i)) . '  ' . $after;
+        }
+
+        return $value;
     }
 
     /**

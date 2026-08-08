@@ -72,11 +72,10 @@ Tags appear in this order, each group separated from the next by a `*`-only line
 2. `@param`
 3. `@return`
 4. `@throws`
-5. `@var` (properties, constants, and enum cases)
-6. `@deprecated`, `@see`, `@link`, `@internal` (when present)
-7. `@since`
+5. `@var`, `@deprecated`, `@see`, `@link`, `@internal`, `@since`
 
-`@since` is always last, and always present.
+`@since` is always last, and always present. The trailing group is not split further, so a property's
+`@var` and `@since` sit on consecutive lines.
 
 ### 3.3 Alignment
 
